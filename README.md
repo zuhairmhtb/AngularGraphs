@@ -18,4 +18,4 @@
 5. Data Series can be updated for individual Graphs.
 
 Screenshots:
-![alt text](https://github.com/zuhairmhtb/AngularGraphs/master/plots.JPG)
+![alt text](https://github.com/zuhairmhtb/AngularGraphs/blob/master/plots.JPG)
