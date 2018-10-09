@@ -19,3 +19,5 @@
 
 Screenshots:
 ![alt text](https://github.com/zuhairmhtb/AngularGraphs/blob/master/plots.JPG)
+![alt text](https://github.com/zuhairmhtb/AngularGraphs/blob/master/gproperties.JPG)
+![alt text](https://github.com/zuhairmhtb/AngularGraphs/blob/master/dproperties.JPG)
