@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+</head>
+<body ng-app="graph_create_delete_app" ng-controller="graph_create_delete_controller">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-lg-3">
+                <button ng-click="add_graph_fn()">Add Graph</button>
+            </div>
+            <div class="col-md-3 col-sm-3 col-lg-3">
+                <button ng-click="delete_graph_fn()">Delete Graph</button>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" id="{{graph_base_div_id}}"></div>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script>
+        function guid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
+
+        var myApp = angular.module("graph_create_delete_app", []);
+        myApp.controller("graph_create_delete_controller", function ($scope) {
+            $scope.available_graphs = [];
+            $scope.available_graph_objects = [];
+            $scope.available_graph_parents = [];
+            $scope.available_graph_data = [];
+            $scope.graph_base_div_id = "main_graph_container";
+
+            $scope.selected_graph = -1;
+            $scope.add_graph_fn = function () {
+                graph_id = guid()
+                while($("#"+graph_id).length != 0){
+                    graph_id = guid();
+                }
+                $scope.available_graphs.push(graph_id);
+
+                graph_container = document.createElement("div");
+                graph_container.setAttribute("id", graph_id);
+                graph_container.onclick = function () {
+                    $scope.selected_graph = -1;
+                    for(i=0; i < $scope.available_graphs.length; i++){
+                        if($scope.available_graphs[i] == $(this).attr("id")){
+                            $scope.selected_graph = i;
+                            break;
+                        }
+                    }
+                    console.log("Current selected graph: " + $scope.available_graphs[$scope.selected_graph]);
+                }
+
+                base_container = document.getElementById($scope.graph_base_div_id);
+                base_container.appendChild(graph_container);
+                $scope.available_graph_parents.push(graph_container);
+
+                graph_data = [{"data": [10, 20, 30, 40, 50], "name": "Series 1"}, {"data": [50, 40, 30, 20, 10], "name": "Series 2"}];
+                $scope.available_graph_data.push(graph_data);
+
+                graph = Highcharts.chart(graph_container, {  //Create new Graph inside the element
+                    chart: {  // Set graph attributes
+                        type: "bar"
+                    },
+                    title: {  // set graph title
+                        text: "Graph Title: " + graph_id,
+                    },
+                    subtitle: {
+                        text: "Graph Subtitle"
+                    },
+                    xAxis: {
+                        title: {
+                            text: "X axis Title"
+                        },
+                        tickInterval: 1,
+                        gridLineWidth: 1
+                    },
+                    yAxis: {
+                        title: {
+                            text: "Y axis Title"
+                        },
+                        tickInterval: 1,
+                        gridLineWidth: 1
+                    },
+                    series: graph_data
+                });
+
+                $scope.available_graph_objects.push(graph);
+
+            }
+            
+            $scope.delete_graph_fn = function () {
+                if($scope.selected_graph >=0 && $scope.selected_graph < $scope.available_graphs.length){
+                    $scope.available_graphs.splice($scope.selected_graph, 1);
+                    $scope.available_graph_objects[$scope.selected_graph].destroy();
+                    $scope.available_graph_objects.splice($scope.selected_graph, 1);
+                    $scope.available_graph_parents[$scope.selected_graph].outerHTML = "";
+                    $scope.available_graph_parents.splice($scope.selected_graph, 1);
+                    $scope.available_graph_data.splice($scope.selected_graph, 1);
+                }
+            }
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+</head>
+<body ng-app="graph_edit_app">
+
+<div class="container-fluid" ng-controller="data_property_controller">
+    <div class="row data_properties_container_header">
+        <div class="col-sm-6 col-lg-6 col-md-6">
+            <h2>Data Property Control Tab</h2>
+        </div>
+    </div>
+    <div class="row data_properties_inpfrom">
+        <div class="col-md-3 col-sm-3 col-lg-3"><label>Input From</label></div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <select class="data_property_inpFrom_input" ng-model="selected_inpFrom_option">
+                <option ng-repeat="(key, value) in inpFrom_options" value="{{key}}">{{value}}</option>
+            </select>
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <label ng-show="selected_inpFrom_option == 0">Data length & Total Data Series: </label>
+            <label ng-show="selected_inpFrom_option == 1">JSON URL: </label>
+            <label ng-show="selected_inpFrom_option == 2">File: </label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <input type="number" class="data_property_random_length_input" ng-show="selected_inpFrom_option == 0" ng-model="random_data_length">
+            <input type="number" class="data_property_random_amount_input" ng-show="selected_inpFrom_option == 0" ng-model="random_data_series_total">
+            <input type="text" class="data_property_url_input" ng-show="selected_inpFrom_option == 1" ng-model="json_url">
+            <input type="file" class="data_property_file_input" ng-show="selected_inpFrom_option == 2">
+        </div>
+    </div>
+    <div class="row data_properties_setTo">
+        <div class="col-sm-3 col-md-3 col-lg-3"><label>Apply to Graph Number: </label></div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <select class="data_properties_setTo_input" ng-model="selected_graph_dpc">
+                <option ng-repeat="(key, value) in available_graphs" value="{{key}}">{{ key }}</option>
+            </select>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3"><label>Total data received: </label></div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <label id="data_property_total_received">{{selected_graph_dpc >= 0? available_graph_data[selected_graph_dpc].length: 0}}</label>
+        </div>
+    </div>
+    <div class="row data_properties_buttons">
+        <div class="col-md-6 col-sm-6 col-lg-6"><button class="btn btn-success" ng-click="get_data_fn()" ng-show="selected_graph_dpc.length > 0">Apply Changes</button></div>
+    </div>
+</div>
+<div class="container-fluid" ng-controller="graph_property_controller">
+    <div class="row graph_properties_container_header">
+        <div class="col-sm-6 col-lg-6 col-md-6">
+            <h2>Graph Property Control Tab</h2>
+        </div>
+    </div>
+    <div class="row graph_properties_gtype">
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Number</label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <select class="graph_properties_setTo_input" ng-model="selected_graph_gpc">
+                <option ng-repeat="(key, value) in available_graphs" value="{{key}}">{{ key }}</option>
+            </select>
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Type: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <select class="graph_property_gtype_input" ng-model="graph_type">
+                <option value="line">Line</option>
+                <option value="bar">Bar</option>
+            </select>
+        </div>
+    </div>
+    <div class="row graph_properties_title">
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Title: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="text" placeholder="Title text" name="graph_property_title_input" class="graph_property_title_input" ng-model="graph_title">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Subtitle: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="text" placeholder="Subtitle text" name="graph_property_subtitle_input" class="graph_property_subtitle_input" ng-model="graph_subtitle">
+        </div>
+    </div>
+    <div class="row graph_properties_axes">
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Title: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="text" placeholder="X-axis Title" name="graph_property_xtitle_input" class="graph_property_xtitle_input" ng-model="graph_xtitle">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Title: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="text" placeholder="Subtitle text" name="graph_property_ytitle_input" class="graph_property_ytitle_input" ng-model="graph_ytitle">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Tick Interval: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="number" name="graph_property_xinterval_input" class="graph_property_xinterval_input" ng-model="graph_xtickinterval">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Tick Interval: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="number" name="graph_property_yinterval_input" class="graph_property_yinterval_input" ng-model="graph_ytickinterval">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Gridline Width: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="number" name="graph_property_xgrid_input" class="graph_property_xgrid_input" ng-model="graph_xgridwidth">
+        </div>
+        <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Gridline Width: </label></div>
+        <div class="col-sm-3 col-lg-3 col-md-3">
+            <input type="number" name="graph_property_ygrid_input" class="graph_property_ygrid_input" ng-model="graph_ygridwidth">
+        </div>
+    </div>
+
+    <div class="row graph_properties_buttons">
+        <div class="col-md-3 col-sm-3 col-lg-3"><button class="btn btn-success" ng-click="set_graph_property_fn()" ng-show="selected_graph_gpc.length > 0">Apply Changes</button></div>
+    </div>
+</div>
+<div class="container-fluid" ng-controller="graph_create_delete_controller">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <button ng-click="add_graph_fn()">Add Graph</button>
+        </div>
+        <div class="col-md-3 col-sm-3 col-lg-3">
+            <button ng-click="delete_graph_fn()">Delete Graph</button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" ng-controller="graph_create_delete_controller" id="{{base_div_id}}"></div>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script>
+
+
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+
+    var myApp = angular.module("graph_edit_app", []);
+    myApp.service("GraphEditorService", function () {
+        var available_graphs = [];
+        function get_available_graphs(){
+            return available_graphs;
+        }
+        function set_available_graphs(graph){
+            available_graphs = graph;
+        }
+        this.get_available_graphs = get_available_graphs;
+        this.set_available_graphs = set_available_graphs;
+
+        var available_graph_objects = [];
+        function get_available_graph_objects(){
+            return available_graph_objects;
+        }
+        function set_available_graph_objects(graph_object){
+            available_graph_objects = graph_object;
+        }
+        this.get_available_graph_objects = get_available_graph_objects;
+        this.set_available_graph_objects = set_available_graph_objects;
+
+        var available_graph_parents = [];
+        function get_available_graph_parents(){
+            return available_graph_parents;
+        }
+        function set_available_graph_parents(graph){
+            available_graph_parents = graph;
+        }
+        this.get_available_graph_parents = get_available_graph_parents;
+        this.set_available_graph_parents = set_available_graph_parents;
+
+        var available_graph_data = [];
+        function get_available_graph_data(){
+            return available_graph_data;
+        }
+        function set_available_graph_data(data){
+            available_graph_data = data;
+        }
+        this.get_available_graph_data = get_available_graph_data;
+        this.set_available_graph_data = set_available_graph_data;
+
+        var graph_base_div_id = "main_graph_container";
+        function get_base_div_id(){
+            return graph_base_div_id;
+        }
+        this.get_base_div_id = get_base_div_id;
+    });
+    myApp.controller("graph_create_delete_controller", function ($scope, GraphEditorService) {
+        $scope.available_graphs = GraphEditorService.get_available_graphs();
+        $scope.available_graph_objects = GraphEditorService.get_available_graph_objects();
+        $scope.available_graph_parents = GraphEditorService.get_available_graph_parents();
+        $scope.available_graph_data = GraphEditorService.get_available_graph_data();
+        $scope.base_div_id = GraphEditorService.get_base_div_id();
+
+        $scope.selected_graph_gcd = -1;
+        $scope.add_graph_fn = function () {
+            available_graphs = GraphEditorService.get_available_graphs();
+            graph_id = guid()
+            while($("#"+graph_id).length != 0){
+                graph_id = guid();
+            }
+            available_graphs.push(graph_id);
+
+            graph_container = document.createElement("div");
+            graph_container.setAttribute("id", graph_id);
+            graph_container.onclick = function () {
+                $scope.selected_graph_gcd = -1;
+                for(i=0; i < available_graphs.length; i++){
+                    if(available_graphs[i] == $(this).attr("id")){
+                        $scope.selected_graph_gcd = i;
+                        break;
+                    }
+                }
+                console.log("Current selected graph: " + available_graphs[$scope.selected_graph_gcd]);
+            }
+
+            base_container = document.getElementById($scope.base_div_id);
+            base_container.appendChild(graph_container);
+            available_graph_parents = GraphEditorService.get_available_graph_parents();
+            available_graph_parents.push(graph_container);
+
+
+            graph_data = [{"data": [10, 20, 30, 40, 50], "name": "Series 1"}, {"data": [50, 40, 30, 20, 10], "name": "Series 2"}];
+            available_graph_data = GraphEditorService.get_available_graph_data();
+            available_graph_data.push(graph_data);
+
+            graph = Highcharts.chart(graph_container, {  //Create new Graph inside the element
+                chart: {  // Set graph attributes
+                    type: "bar"
+                },
+                title: {  // set graph title
+                    text: "Graph Title: " + graph_id,
+                },
+                subtitle: {
+                    text: "Graph Subtitle"
+                },
+                xAxis: {
+                    title: {
+                        text: "X axis Title"
+                    },
+                    tickInterval: 1,
+                    gridLineWidth: 1
+                },
+                yAxis: {
+                    title: {
+                        text: "Y axis Title"
+                    },
+                    tickInterval: 1,
+                    gridLineWidth: 1
+                },
+                series: graph_data
+            });
+            available_graph_objects = GraphEditorService.get_available_graph_objects();
+            available_graph_objects.push(graph);
+
+            GraphEditorService.set_available_graphs(available_graphs);
+            GraphEditorService.set_available_graph_parents(available_graph_parents);
+            GraphEditorService.set_available_graph_data(available_graph_data);
+            GraphEditorService.set_available_graph_objects(available_graph_objects);
+
+            $scope.available_graphs = GraphEditorService.get_available_graphs();
+            $scope.available_graph_objects = GraphEditorService.get_available_graph_objects();
+            $scope.available_graph_parents = GraphEditorService.get_available_graph_parents();
+            $scope.available_graph_data = GraphEditorService.get_available_graph_data();
+
+        }
+        $scope.delete_graph_fn = function () {
+            if($scope.selected_graph_gcd >= 0 && $scope.selected_graph_gcd < GraphEditorService.get_available_graphs().length){
+                available_graphs = GraphEditorService.get_available_graphs();
+                available_graphs.splice($scope.selected_graph_gcd, 1);
+                available_graph_parents = GraphEditorService.get_available_graph_parents();
+                available_graph_parents[$scope.selected_graph_gcd].outerHTML = "";
+                available_graph_parents.splice($scope.selected_graph_gcd, 1);
+                available_graph_objects = GraphEditorService.get_available_graph_objects();
+                available_graph_objects[$scope.selected_graph_gcd].destroy();
+                available_graph_objects.splice($scope.selected_graph_gcd, 1);
+                available_graph_data = GraphEditorService.get_available_graph_data();
+                available_graph_data.splice($scope.selected_graph_gcd, 1);
+
+                GraphEditorService.set_available_graphs(available_graphs);
+                GraphEditorService.set_available_graph_parents(available_graph_parents);
+                GraphEditorService.set_available_graph_data(available_graph_data);
+                GraphEditorService.set_available_graph_objects(available_graph_objects);
+
+                $scope.available_graphs = GraphEditorService.get_available_graphs();
+                $scope.available_graph_objects = GraphEditorService.get_available_graph_objects();
+                $scope.available_graph_parents = GraphEditorService.get_available_graph_parents();
+                $scope.available_graph_data = GraphEditorService.get_available_graph_data();
+
+            }
+        }
+
+    });
+    myApp.controller("data_property_controller", function ($scope, $http, GraphEditorService) {
+        $scope.available_graphs = GraphEditorService.get_available_graphs();
+        $scope.available_graph_objects = GraphEditorService.get_available_graph_objects();
+        $scope.available_graph_parents = GraphEditorService.get_available_graph_parents();
+        $scope.available_graph_data = GraphEditorService.get_available_graph_data();
+        $scope.base_div_id = GraphEditorService.get_base_div_id();
+        $scope.inpFrom_options = ["Random", "JSON URL", "File"];
+        $scope.selected_inpFrom_option = -1;
+        $scope.selected_graph_dpc = -1;
+        $scope.random_data_length = 0;
+        $scope.random_data_series_total = 0;
+        $scope.json_url="";
+        $scope.file_url="";
+        $scope.get_data_fn = function () {
+            available_graph_objects = GraphEditorService.get_available_graph_objects();
+            available_graph_data = GraphEditorService.get_available_graph_data();
+            if($scope.selected_graph_dpc >=0 && $scope.selected_graph_dpc < available_graph_objects.length){
+                if($scope.selected_inpFrom_option == 0 && $scope.random_data_length > 0 && $scope.random_data_series_total > 0){//Create Random data of length n
+                    total_data = [];
+                    for(j=0; j < $scope.random_data_series_total; j++){
+                        random_data = [];
+                        for(i=0; i < $scope.random_data_length; i++){
+                            random_data.push(Math.random());
+                        }
+                        total_data.push({
+                            "data": random_data,
+                            "name": "Series"+j
+                        });
+                    }
+                    available_graph_data[$scope.selected_graph_dpc] = total_data;
+                }
+                else if($scope.selected_inpFrom_option == 1 && $scope.json_url.length > 0){//Get data from JSON call
+                    $http({
+                        method : "GET",
+                        url : $scope.json_url
+                    }).then(function mySuccess(response) {
+                        available_graph_data[$scope.selected_graph_dpc] = response.data;
+                    }, function myError(response) {
+                        console.log(response.statusText)
+                    });
+                }
+                while(available_graph_objects[$scope.selected_graph_dpc].series.length > 0)
+                    available_graph_objects[$scope.selected_graph_dpc].series[0].remove(true);
+                for(i=0; i < available_graph_data[$scope.selected_graph_dpc].length; i++){
+                    available_graph_objects[$scope.selected_graph_dpc].addSeries(available_graph_data[$scope.selected_graph_dpc][i], false);
+                }
+                available_graph_objects[$scope.selected_graph_dpc].redraw();
+                GraphEditorService.set_available_graph_objects(available_graph_objects);
+                GraphEditorService.set_available_graph_data(available_graph_data);
+                $scope.selected_inpFrom_option = -1;
+                $scope.selected_graph_dpc = -1;
+                $scope.random_data_length = 0;
+                $scope.random_data_series_total = 0;
+                $scope.json_url="";
+                $scope.file_url="";
+
+            }
+            else{
+                console.log("Select a Graph First");
+            }
+
+        }
+
+
+    });
+    myApp.controller("graph_property_controller", function ($scope, GraphEditorService) {
+        $scope.graph_type = "";
+        $scope.graph_title = "";
+        $scope.graph_subtitle = "";
+        $scope.graph_xtitle = "";
+        $scope.graph_ytitle = "";
+        $scope.graph_xtickinterval = 0;
+        $scope.graph_ytickinterval = 0;
+        $scope.graph_xgridwidth = 0;
+        $scope.graph_ygridwidth = 0;
+        $scope.selected_graph_gpc = -1;
+
+        $scope.available_graphs = GraphEditorService.get_available_graphs();
+        $scope.available_graph_objects = GraphEditorService.get_available_graph_objects();
+        $scope.available_graph_parents = GraphEditorService.get_available_graph_parents();
+        $scope.available_graph_data = GraphEditorService.get_available_graph_data();
+
+
+        $scope.set_graph_property_fn = function () {
+            available_graphs = GraphEditorService.get_available_graphs();
+            available_graph_objects = GraphEditorService.get_available_graph_objects();
+            if($scope.selected_graph_gpc >= 0 && $scope.selected_graph_gpc < $scope.available_graphs.length){
+                console.log('Setting properties to Graph: ' + $scope.selected_graph_gpc);
+
+                updated_options = {};
+                if($scope.graph_type.length > 0){
+                    updated_options.chart = {type: $scope.graph_type};
+                }
+
+                if($scope.graph_title.length > 0){
+                    updated_options.title = {text: $scope.graph_title};
+                }
+                if($scope.graph_subtitle.length > 0){
+                    updated_options.subtitle = {text: $scope.graph_subtitle};
+                }
+                updated_xAxis = {};
+                if($scope.graph_xtitle.length > 0){
+                    updated_xAxis.title = {text: $scope.graph_xtitle};
+                }
+                if($scope.graph_xtickinterval > 0){
+                    updated_xAxis.tickInterval = $scope.graph_xtickinterval;
+                }
+                if($scope.graph_xgridwidth > 0){
+                    updated_xAxis.gridLineWidth= $scope.graph_xgridwidth;
+                }
+                updated_options.xAxis = updated_xAxis;
+                updated_yAxis = {};
+                if($scope.graph_ytitle.length > 0){
+                    updated_yAxis.title = {text: $scope.graph_ytitle};
+                }
+                if($scope.graph_ytickinterval > 0){
+                    updated_yAxis.tickInterval = $scope.graph_ytickinterval;
+                }
+                if($scope.graph_ygridwidth > 0){
+                    updated_yAxis.gridLineWidth= $scope.graph_ygridwidth;
+                }
+                updated_options.yAxis = updated_yAxis;
+
+
+                console.log(updated_options);
+                available_graph_objects[$scope.selected_graph_gpc].update(updated_options);
+                $scope.graph_type = "";
+                $scope.graph_title = "";
+                $scope.graph_subtitle = "";
+                $scope.graph_xtitle = "";
+                $scope.graph_ytitle = "";
+                $scope.graph_xtickinterval = 0;
+                $scope.graph_ytickinterval = 0;
+                $scope.graph_xgridwidth = 0;
+                $scope.graph_ygridwidth = 0;
+                $scope.selected_graph_gpc = -1;
+
+            }
+        }
+        
+        $scope.view_graph_property_fn = function () {
+            if($scope.selected_graph_gpc >= 0 && $scope.selected_graph_gpc < $scope.available_graphs.length){
+
+                $scope.graph_title = $scope.available_graph_objects[$scope.selected_graph_gpc].options.title.text;
+                $scope.graph_subtitle = $scope.available_graph_objects[$scope.selected_graph_gpc].options.subtitle.text;
+                $scope.graph_xtitle = $scope.available_graph_objects[$scope.selected_graph_gpc].xAxis[0].title;
+                $scope.graph_ytitle = $scope.available_graph_objects[$scope.selected_graph_gpc].yAxis.title;
+                $scope.graph_xtickinterval = $scope.available_graph_objects[$scope.selected_graph_gpc].options.xAxis.tickInterval;
+                $scope.graph_ytickinterval = $scope.available_graph_objects[$scope.selected_graph_gpc].options.yAxis.tickInterval;
+                $scope.graph_xgridwidth = $scope.available_graph_objects[$scope.selected_graph_gpc].options.xAxis.gridLineWidth;
+                $scope.graph_ygridwidth = $scope.available_graph_objects[$scope.selected_graph_gpc].options.yAxis.gridLineWidth;
+            }
+
+        }
+
+    });
+
+</script>
+</body>
+</html>

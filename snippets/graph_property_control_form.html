@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+</head>
+<body ng-app="graph_property_control_app" ng-controller="graph_property_controller">
+
+    <div class="container-fluid">
+        <div class="row graph_properties_container_header">
+            <div class="col-sm-6 col-lg-6 col-md-6">
+                <h2>Graph Property Control Tab</h2>
+            </div>
+        </div>
+        <div class="row graph_properties_gtype">
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Number</label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <select class="graph_properties_setTo_input" ng-model="selected_graph">
+                    <option ng-repeat="(key, value) in available_graphs" value="{{key}}">{{ key }}</option>
+                </select>
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Type: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <select class="graph_property_gtype_input" ng-model="graph_type">
+                    <option value="line">Line</option>
+                    <option value="bar">Bar</option>
+                </select>
+            </div>
+        </div>
+        <div class="row graph_properties_title">
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Title: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="text" placeholder="Title text" name="graph_property_title_input" class="graph_property_title_input" ng-model="graph_title">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Graph Subtitle: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="text" placeholder="Subtitle text" name="graph_property_subtitle_input" class="graph_property_subtitle_input" ng-model="graph_subtitle">
+            </div>
+        </div>
+        <div class="row graph_properties_axes">
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Title: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="text" placeholder="X-axis Title" name="graph_property_xtitle_input" class="graph_property_xtitle_input" ng-model="graph_xtitle">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Title: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="text" placeholder="Subtitle text" name="graph_property_ytitle_input" class="graph_property_ytitle_input" ng-model="graph_ytitle">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Tick Interval: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="number" name="graph_property_xinterval_input" class="graph_property_xinterval_input" ng-model="graph_xtickinterval">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Tick Interval: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="number" name="graph_property_yinterval_input" class="graph_property_yinterval_input" ng-model="graph_ytickinterval">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>X-axis Gridline Width: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="number" name="graph_property_xgrid_input" class="graph_property_xgrid_input" ng-model="graph_xgridwidth">
+            </div>
+            <div class="col-sm-3 col-lg-3 col-md-3"><label>Y-axis Gridline Width: </label></div>
+            <div class="col-sm-3 col-lg-3 col-md-3">
+                <input type="number" name="graph_property_ygrid_input" class="graph_property_ygrid_input" ng-model="graph_ygridwidth">
+            </div>
+        </div>
+        <div class="row graph_properties_highstock">
+            <div class="col-sm-3 col-md-3 col-lg-3"><label>Navigator View</label></div>
+            <div class="col-sm-3 col-md-3 col-lg-3">
+                <select class="graph_property_navigator_input">
+                    <option>True</option>
+                    <option>False</option>
+                </select>
+            </div>
+        </div>
+        <div class="row data_properties_buttons">
+            <div class="col-md-6 col-sm-6 col-lg-6"><button class="btn btn-success" ng-click="set_graph_property_fn()">Apply Changes</button></div>
+        </div>
+    </div>
+    <div class="container-fluid" id="sample_graph_container">
+
+    </div>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script>
+    var myApp = angular.module("graph_property_control_app", []);
+    myApp.controller("graph_property_controller", function($scope, $http){
+        $scope.graph_type = "bar";
+        $scope.graph_title = "Graph Title";
+        $scope.graph_subtitle = "Graph Subtitle";
+        $scope.graph_xtitle = "X axis Title";
+        $scope.graph_ytitle = "Y axis Title";
+        $scope.graph_xtickinterval = 1;
+        $scope.graph_ytickinterval = 1;
+        $scope.graph_xgridwidth = 1;
+        $scope.graph_ygridwidth = 1;
+
+        $scope.available_graphs = ["sample_graph_container"];
+        $scope.available_graph_objects =[];
+        $scope.available_graph_data = [];
+        $scope.selected_graph = 0;
+
+        $scope.set_graph_property_fn = function () {
+            if($scope.selected_graph >= 0 && $scope.selected_graph < $scope.available_graphs.length){
+                console.log('Setting properties to Graph: ' + $scope.selected_graph);
+                $scope.available_graph_objects[$scope.selected_graph].destroy();
+                $scope.available_graph_objects[$scope.selected_graph] = Highcharts.chart($("#"+$scope.available_graphs[$scope.selected_graph])[0], {  //Create new Graph inside the element
+                    chart: {  // Set graph attributes
+                        type: $scope.graph_type
+                    },
+                    title: {  // set graph title
+                        text: $scope.graph_title,
+                    },
+                    subtitle: {
+                        text: $scope.graph_subtitle
+                    },
+                    xAxis: {
+                        title: {
+                            text: $scope.graph_xtitle
+                        },
+                        tickInterval: $scope.graph_xtickinterval,
+                        gridLineWidth: $scope.graph_xgridwidth
+                    },
+                    yAxis: {
+                        title: {
+                            text: $scope.graph_ytitle
+                        },
+                        tickInterval: $scope.graph_ytickinterval,
+                        gridLineWidth: $scope.graph_ygridwidth
+                    },
+                    series: $scope.available_graph_data[$scope.selected_graph]
+                });
+
+            }
+        }
+        for(i=0; i < $scope.available_graphs.length; i++){
+            $scope.available_graph_data.push([{"data": [10, 20, 30, 40, 50], "name": "Series 1"}, {"data": [50, 40, 30, 20, 10], "name": "Series 2"}]);
+            $scope.available_graph_objects.push(Highcharts.chart($("#"+$scope.available_graphs[i])[0], {  //Create new Graph inside the element
+                chart: {  // Set graph attributes
+                    type: $scope.graph_type
+                },
+                title: {  // set graph title
+                    text: $scope.graph_title,
+                },
+                subtitle: {
+                    text: $scope.graph_subtitle
+                },
+                xAxis: {
+                    title: {
+                        text: $scope.graph_xtitle
+                    },
+                    tickInterval: $scope.graph_xtickinterval,
+                    gridLineWidth: $scope.graph_xgridwidth
+                },
+                yAxis: {
+                    title: {
+                        text: $scope.graph_ytitle
+                    },
+                    tickInterval: $scope.graph_ytickinterval,
+                    gridLineWidth: $scope.graph_ygridwidth
+                },
+                series: $scope.available_graph_data[i]
+            }));
+
+
+        }
+
+    });
+</script>
+</body>
+</html>
